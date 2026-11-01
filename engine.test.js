@@ -20,3 +20,17 @@ test('no replay settlement; bankrupt session unlocks; reload state survives',()=
 test('decimal stakes, smallest balance remains playable',()=>{const s=rig([10,10,6,7]);s.bankroll=.01;deal(s,.01);act(s,'surrender');assert.equal(s.bankroll,.01);assert.throws(()=>deal(fresh(),NaN));assert.throws(()=>deal(fresh(),1001));assert.throws(()=>deal(fresh(),.001));});
 test('many rounds maintain nonnegative funds and terminate',()=>{const s=fresh(1000);for(let i=0;i<400&&s.bankroll>0;i++){deal(s,Math.min(s.bankroll,10));let steps=0;while(s.phase==='playing'){assert.ok(++steps<100);const a=available(s),h=s.hands[s.active];act(s,baseAction(h.cards,s.dealer[0],s.rules,{canSplit:a.includes('split'),canDouble:a.includes('double'),canSurrender:a.includes('surrender')}));}assert.ok(s.bankroll>=0);assert.ok(Number.isFinite(s.bankroll));assert.equal(Math.round(s.bankroll*100)/100,s.bankroll);}});
 
+import {explainDecision} from './review.js';
+
+const reviewRecord=(hand,dealer,expected,extra={})=>({cards:hand.map(rank=>({rank:String(rank),suit:'♠'})),dealer:{rank:String(dealer),suit:'♥'},expected,action:'stand',correct:false,...extra});
+test('review distinguishes soft, hard and pairs with concrete patterns',()=>{
+ const hard=explainDecision(reviewRecord([10,2],3,'hit'),DEFAULT_RULES);assert.equal(hard.pattern,'ハード 12');assert.match(hard.rule,/対2・3/);
+ const soft=explainDecision(reviewRecord(['A',7],9,'hit'),DEFAULT_RULES);assert.equal(soft.pattern,'ソフト 18');assert.match(soft.reason,/18でも/);
+ const pair=explainDecision(reviewRecord([8,8],10,'split'),DEFAULT_RULES);assert.match(pair.reason,/16/);assert.match(pair.rule,/原則スプリット/);
+});
+test('review explains actual restrictions and uses decision-time rules',()=>{
+ const e=explainDecision(reviewRecord(['A',7],6,'stand',{options:['hit','stand']}),DEFAULT_RULES);assert.match(e.notes.join(''),/通常の表ではダブル/);assert.match(e.notes.join(''),/スタンドを推奨/);
+ const snapshot=explainDecision(reviewRecord([10,5],'A','surrender',{rules:{...DEFAULT_RULES,h17:true}}),DEFAULT_RULES);assert.match(snapshot.rule,/H17/);
+});
+test('review recognizes face cards as ten and dealer natural risk in ENHC',()=>{const e=explainDecision(reviewRecord([6,5],'K','hit'),{...DEFAULT_RULES,mode:'enhc'});assert.match(e.notes.join(''),/追加ベットも失います/);});
+
