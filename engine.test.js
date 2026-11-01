@@ -34,3 +34,52 @@ test('review explains actual restrictions and uses decision-time rules',()=>{
 });
 test('review recognizes face cards as ten and dealer natural risk in ENHC',()=>{const e=explainDecision(reviewRecord([6,5],'K','hit'),{...DEFAULT_RULES,mode:'enhc'});assert.match(e.notes.join(''),/追加ベットも失います/);});
 
+import {buildRoundPlan,settlementFor} from './round-flow.js';
+const identify=s=>{let i=0;for(const card of [...s.shoe,...s.dealer,...s.hands.flatMap(h=>h.cards)])card.id||=String(++i);return s;};
+test('round presentation reveals dealer, announces result, pays chips, then enables the optional review',()=>{
+ const s=identify(rig([10,6,8,10,10]));deal(s,50);const before=structuredClone(s);act(s,'stand');
+ const untouched=structuredClone(s),plan=buildRoundPlan(before,s,{kind:'action',action:'stand'}),types=plan.map(p=>p.type);
+ assert.ok(types.indexOf('dealer-total')<types.indexOf('outcome'));
+ assert.ok(types.indexOf('outcome')<types.indexOf('payout'));
+ assert.equal(types.at(-1),'ready');
+ const result=plan.find(p=>p.type==='outcome'),payout=plan.find(p=>p.type==='payout');
+ assert.equal(result.view.bankroll,950);assert.equal(payout.payment.returned,100);
+ assert.equal(payout.after.bankroll,1050);assert.equal(plan.at(-1).view.bankroll,s.bankroll);
+ assert.ok(plan.every(p=>!['review','open-review'].includes(p.type)));
+ assert.deepEqual(s,untouched);
+});
+test('loss, push, blackjack, surrender and double reconcile visual chip movements with engine payouts',()=>{
+ const cases=[{r:[10,10,8,9],a:'stand',ret:0},{r:[10,10,8,8],a:'stand',ret:50},{r:['A',9,'K',8],a:null,ret:125},{r:[10,10,6,7],a:'surrender',ret:25},{r:[5,6,6,10,10,10],a:'double',ret:200}];
+ for(const item of cases){const s=identify(rig(item.r));let before=structuredClone(s);deal(s,50);if(item.a){before=structuredClone(s);act(s,item.a);}const plan=buildRoundPlan(before,s,{kind:item.a?'action':'deal',action:item.a}),p=settlementFor(s);
+  assert.equal(p.returned,item.ret);assert.equal(p.before+p.returned,p.after);
+  const payments=plan.filter(step=>step.type==='payout');assert.equal(payments.reduce((n,step)=>n+step.payment.returned,0),item.ret);
+  assert.equal(plan.at(-1).view.bankroll,s.bankroll);assert.equal(plan.at(-1).view.phase,'finished');
+ }
+});
+test('split keeps original card identities, deals each new card separately, and pays each hand once',()=>{
+ const s=identify(rig(['A',6,'A',10,10,10,10]));deal(s,50);const before=structuredClone(s);act(s,'split');
+ const plan=buildRoundPlan(before,s,{kind:'action',action:'split'}),split=plan.find(p=>p.type==='split');
+ assert.equal(split.view.hands[0].cards[0].id,before.hands[0].cards[0].id);
+ assert.equal(split.view.hands[1].cards[0].id,before.hands[0].cards[1].id);
+ assert.ok(split.view.hands.every(h=>h.cards.length===1));
+ assert.equal(plan.filter(p=>p.type==='deal-card'&&p.side==='player').length,2);
+ const payments=plan.filter(p=>p.type==='payout');assert.equal(payments.length,2);
+ assert.equal(payments[0].view.bankroll,900);assert.equal(payments[0].after.bankroll,1000);
+ assert.equal(payments[1].view.bankroll,1000);assert.equal(payments[1].after.bankroll,1100);
+});
+test('player cards stay covered during flight and the dealer hole card stays covered until dealer turn',()=>{
+ const s=identify(rig([5,6,6,10,10]));const before=structuredClone(s);deal(s,50);
+ const plan=buildRoundPlan(before,s,{kind:'deal'});
+ for(const step of plan.filter(p=>p.type==='deal-card'))assert.ok(step.view.hiddenCards.includes(step.cardId));
+ for(const step of plan.filter(p=>p.type==='turn-card'))assert.ok(!step.view.hiddenCards.includes(step.cardId));
+ assert.ok(plan.at(-1).view.hiddenCards.includes(s.dealer[1].id));
+ assert.ok(!plan.some(p=>p.type==='outcome'||p.type==='payout'));
+});
+test('ENHC reveals the second dealer card only after player action and before settlement',()=>{
+ const s=identify(rig([5,10,6,10,'A'],{mode:'enhc'}));deal(s,50);const before=structuredClone(s);act(s,'double');
+ const plan=buildRoundPlan(before,s,{kind:'action',action:'double'}),dealerDeal=plan.findIndex(p=>p.type==='deal-card'&&p.side==='dealer');
+ assert.ok(dealerDeal>plan.findIndex(p=>p.type==='dealer-turn'));
+ assert.ok(dealerDeal<plan.findIndex(p=>p.type==='outcome'));
+ assert.equal(plan.at(-1).view.bankroll,900);
+});
+

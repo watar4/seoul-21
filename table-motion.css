@@ -1,0 +1,123 @@
+/* Cards keep their DOM identity from the shoe to the discard tray. */
+.felt {perspective:1200px; background:radial-gradient(ellipse at 50% 45%,#68a9700b,transparent 70%)}
+.table-card {background:none!important;border:0!important;box-shadow:none!important;overflow:visible;transform:translateY(var(--card-lift,0)) rotate(var(--fan,0deg));transform-origin:50% 80%;perspective:700px;filter:drop-shadow(0 3px 2px #0005);backface-visibility:visible;will-change:auto}
+.card-inner {position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(0);border-radius:inherit}
+.table-card[data-down="true"] .card-inner {transform:rotateY(180deg)}
+.card-side {position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:7px;overflow:hidden;border:1px solid #fff9}
+.card-front {background:linear-gradient(125deg,#fffef9,#f8f3e3 70%,#e7dfca);box-shadow:inset 0 0 0 2px #fffc,inset 0 -2px 4px #8a775630;color:#17382f}
+.table-card.red .card-front {color:#b52c3a}
+.card-reverse {transform:rotateY(180deg);padding:5px;background:linear-gradient(135deg,#fbf4df,#d9cfb0);box-shadow:inset 0 0 0 1px #fffa}
+.back-frame {position:absolute;inset:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #bbae78;border-radius:4px;background:repeating-linear-gradient(45deg,#213a5d 0 2px,#314b70 2px 3px);color:#e3cf9b;outline:1px solid #796c4a;outline-offset:-4px}
+.back-frame i {font-size:27px;font-style:normal;filter:drop-shadow(0 1px 1px #0008)}
+.back-frame small {font:5px/1.5 Arial,sans-serif;letter-spacing:1px}
+.card-sheen {position:absolute;inset:-1px;border-radius:7px;background:linear-gradient(105deg,transparent 30%,#fff9 48%,transparent 64%);opacity:0;pointer-events:none;z-index:4}
+.table-card .pips {position:absolute;inset:4px 9px}
+.pips i {position:absolute;transform:translate(-50%,-50%) rotate(var(--pip-turn));font-size:15px;line-height:1;font-style:normal}
+.court {position:absolute;inset:19px 13px;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#dec89140,transparent);overflow:hidden}
+.court i {font:26px Georgia,serif;font-style:normal;opacity:.22;position:absolute;transform:scale(1.9)}
+.court b {font:25px Georgia,serif;font-weight:bold;z-index:1;text-shadow:1px 1px #ffff}
+.court.ace {border:0;inset:18px 10px;background:none}
+.court.ace i {opacity:1;transform:none;font-size:32px}
+.table-card .corner {z-index:2}
+.table-card .corner.bottom {z-index:2}
+.cards {perspective:1000px;padding:3px 3px 1px}
+.hand {transition:background .3s,border-color .3s;position:relative}
+.hands,.dealer-zone {flex-shrink:0}
+.hand.active {background:linear-gradient(#fff1,#fff0);border-color:#e5cb8980;box-shadow:inset 0 1px #fff1}
+.hand-label .score {display:inline-block;transform-origin:center}
+.score.is-bust {background:#713329;border-color:#b87868;color:#ffe2ce}
+.hand-foot {display:flex;align-items:center;justify-content:center;gap:9px;min-height:28px;flex-wrap:wrap}
+.hand-wager {display:inline-flex;align-items:center;gap:7px;height:25px}
+.hand-bet {font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;color:#ffe7b2}
+.mini-chips {display:flex;align-items:center;width:31px;position:relative;height:22px;transition:opacity .2s}
+.mini-chips .poker-chip {width:22px;height:22px;font-size:5px;box-shadow:0 2px 0 #192e25,0 4px 3px #0005;position:absolute;left:0;transform:rotateX(23deg)}
+.mini-chips .poker-chip+ .poker-chip {left:7px;top:-1px}
+.mini-chips .poker-chip:before {inset:3px}
+.mini-chips .poker-chip>span {inset:5px;border-width:1px;font-size:5px}
+.hand-state {font-size:9px;color:#d9dcc2;letter-spacing:.4px;white-space:nowrap}
+.hand[data-result="win"] .hand-state,.hand[data-result="blackjack"] .hand-state {color:#ffe29c}
+.hand[data-result="lose"] .hand-state,.hand[data-result="bust"] .hand-state {color:#f0b8ac}
+.hand.settled .mini-chips {opacity:0!important}
+.wager-zone.in-play {min-height:24px;height:24px;gap:0}
+.wager-zone.in-play .wager-label {display:flex;align-items:center;gap:8px;color:#b4c7a5}
+.wager-zone.in-play .wager-label strong {font-size:14px;line-height:1;color:#d5debd}
+.table-mark {position:relative;min-height:78px;width:min(90%,420px);display:flex;flex-direction:column;justify-content:center;flex-shrink:0}
+.table-mark.has-result>span,.table-mark.has-result>small,.table-mark.has-result>b {visibility:hidden}
+.round-result {position:absolute;inset:-2px 0;z-index:6;display:grid;grid-template-columns:1fr auto;align-content:center;gap:0 18px;text-align:left;padding:12px 22px;background:linear-gradient(100deg,#163425f5,#1f4733f5);border:1px solid #d8bd737a;border-radius:12px;box-shadow:0 8px 24px #00140e70,inset 0 1px #fff2;letter-spacing:0;font-family:Arial,"Yu Gothic",Meiryo,sans-serif}
+.result-copy strong {display:block;font-size:28px;line-height:1.2;letter-spacing:2px;color:#ffe1a2;font-weight:700}
+.result-copy small {font-size:11px;display:block;color:#d7d9b7;margin-bottom:2px}
+.result-money {align-self:center;text-align:right;color:#ffe1a2}
+.result-money strong {font-size:27px;line-height:1.1;display:block;font-variant-numeric:tabular-nums}
+.result-money small {display:block;font-size:8px;letter-spacing:2px;margin:4px 0 0}
+#result-payment {grid-column:1/-1;text-align:center;font-size:9px;letter-spacing:1px;color:#acbf9f;margin-top:6px}
+.round-result[data-outcome="lose"] {background:linear-gradient(100deg,#352c26f5,#403a2cf5);border-color:#bb8e6869}
+.round-result[data-outcome="lose"] .result-copy strong,.round-result[data-outcome="lose"] .result-money {color:#efc2a6}
+.round-result[data-outcome="push"] .result-copy strong,.round-result[data-outcome="push"] .result-money {color:#c8e2d8}
+.action-flash {position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:13px;background:radial-gradient(ellipse,#0d3f2cf0,#0d3f2cf0 50%,transparent 74%);z-index:5;font-family:Arial,"Yu Gothic",Meiryo,sans-serif;text-align:left;color:#f2ddb1;letter-spacing:1px}
+.action-symbol {width:45px;height:45px;border:1px solid #e8d19560;border-radius:50%;display:grid;place-items:center;font-size:28px;box-shadow:inset 0 0 20px #e5d49115}
+.action-flash b {display:block;font-size:22px;line-height:1.2}
+.action-flash small {display:block!important;font-size:10px!important;letter-spacing:0!important;margin:5px 0 0!important;color:#e0e4ca}
+.shoe {z-index:4;opacity:1;right:22px;top:38px;box-shadow:1px 1px #ddd6bd,3px 3px #a9a58e,5px 5px #e7dfc7,7px 7px #a9a58e,9px 9px 10px #00150bad}
+.discard {position:absolute;left:25px;top:42px;width:28px;height:39px;border:1px solid #d9d3a42b;border-radius:4px;transform:rotate(-18deg);background:#002f1d30}
+.dealer-bank {position:absolute;left:50%;top:0;transform:translate(-50%,-65%);display:flex;gap:3px;padding:4px 8px;background:#0a261d;border:1px solid #3c6544;border-radius:4px;opacity:.65}
+.dealer-bank i {height:12px;width:13px;border:2px dashed #d0d4b4;border-radius:3px;background:#7c9b5c;box-shadow:0 2px #193526}
+.dealer-bank i:nth-child(2n) {background:#af4e4c}
+.dealer-bank i:nth-child(3) {background:#628eae}
+.motion-layer {position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}
+.flying-chip {position:absolute;left:0;top:0;width:34px;height:34px;perspective:500px;will-change:transform;filter:drop-shadow(2px 12px 4px #0005)}
+.flying-chip .poker-chip {width:34px;height:34px;font-size:9px;box-shadow:0 2px 0 #142b21,0 4px 0 var(--chip),0 5px 1px #142b21}
+.flying-chip .poker-chip:before {inset:4px}
+.flying-chip .poker-chip>span {inset:7px;border-width:1px}
+.round-end {max-width:640px;margin:0 auto}
+.action-dock {min-height:76px;display:flex;flex-direction:column;justify-content:flex-end}
+.action-dock>form,.action-dock>.actions,.action-dock>.round-end {width:100%}
+.round-end>div {display:flex;justify-content:center;gap:10px}
+.round-end button {min-height:43px;flex:1}
+.round-end #review-open {font-size:13px;padding:9px 14px;max-width:260px;background:#0d3929;border-color:#aece9c70}
+.round-end #next-round {font-size:15px;max-width:280px}
+#settlement-receipt {text-align:center;font-size:10px;color:#d6dec2;margin:0 0 7px;font-variant-numeric:tabular-nums}
+.casino[data-stage="result"] .chip-tray,.casino[data-stage="settling"] .chip-tray,.casino[data-stage="finished"] .chip-tray {opacity:.6}
+/* Realistic hand poses: the wrist, finger articulation and table shadow have
+   separate animation tracks. Signals never capture clicks or open a dialog. */
+.gesture-overlay.realistic-signal {left:62%;top:43%;width:220px;height:270px;transform:translate(-50%,0);filter:none;z-index:16;perspective:700px;overflow:visible}
+.realistic-signal .hand-wrist {position:absolute;inset:0;transform-origin:50% 90%;filter:drop-shadow(4px 9px 5px #00150b44)}
+.hand-pose {position:absolute;inset:0;background-repeat:no-repeat;background-size:400% 200%;pointer-events:none}
+.pose-b {opacity:0}
+.hand-ground-shadow {position:absolute;left:21%;top:23%;width:57%;height:63%;border-radius:45% 45% 30% 30%;background:#000;filter:blur(8px);opacity:0;transform:rotate(-8deg)}
+.hand-contact {position:absolute;left:41%;top:22%;width:29px;height:13px;border:2px solid #f3e0ba7a;border-radius:50%;opacity:0;filter:blur(.5px)}
+.realistic-signal .gesture-caption {bottom:4px;z-index:4;font-size:11px;padding:8px 12px;white-space:nowrap;background:#0a2e22ed;box-shadow:0 3px 16px #0004;border-color:#a5b39070;display:flex;flex-direction:column;align-items:center;gap:2px;color:#f5edd8;letter-spacing:0}
+.realistic-signal .gesture-caption b {font-size:9px;letter-spacing:2px;color:#d8c68f}
+@media(min-width:601px) and (min-height:801px) {
+ .felt .card {width:75px;height:105px}.felt .cards {min-height:105px}.table-card .corner {font-size:18px}.table-card .pips i {font-size:17px}.table-card .court b {font-size:29px}.table-card .court.ace i {font-size:36px}
+ .felt .card+.card {margin-left:-18px}.hand-label {margin-bottom:13px}.hand-foot {margin-top:10px}.gesture-overlay.realistic-signal {width:250px;height:315px;top:40%}
+}
+@media(min-width:601px) and (min-height:501px) and (max-height:800px) {
+ .felt .card {width:50px;height:70px}.felt .cards {min-height:70px}.table-mark {min-height:48px}.hand-label {margin-bottom:5px}.hand-foot {min-height:23px;margin-top:6px}.chip-tray {margin-top:9px}.chip-rack .poker-chip {width:55px;height:55px}.chip-rack .poker-chip>span {inset:11px}.controls {padding-bottom:9px}.table-card .pips i {font-size:12px}.table-card .court {inset:16px 11px}.table-card .court b {font-size:20px}
+}
+@media(max-width:600px) {
+ .table-mark {min-height:68px;width:87%}.round-result {padding:9px 13px;gap:0 10px;border-radius:10px;inset:-4px 0}
+ .result-copy strong {font-size:21px;letter-spacing:1px}.result-copy small {font-size:9px}.result-money strong {font-size:24px}.result-money small {font-size:7px}#result-payment {font-size:8px;margin-top:4px}
+ .hand-foot {gap:4px;min-height:23px;margin-top:6px}.hand-wager {gap:4px}.hand-bet {font-size:10px}.hand-state {font-size:8px}.hands.multi .hand-foot {flex-direction:column;gap:0}.hands.multi .hand-state {font-size:7px}
+ .table-card .pips {inset:5px 9px}.table-card .pips i {font-size:13px}.hands.multi .table-card .pips {inset:5px 7px}.hands.multi .pips i {font-size:10px}.hands.multi .court {inset:15px 10px}.hands.multi .court b {font-size:19px}
+ .round-end>div {gap:7px}.round-end #review-open {font-size:12px;padding:9px 6px}.round-end #next-round {font-size:13px;padding:9px 6px}.round-end button {min-height:39px}#settlement-receipt {font-size:9px;margin-bottom:5px}
+ .shoe {right:12px;top:29px}.discard {left:15px;top:31px;width:22px;height:31px}.dealer-bank {padding:3px 5px;gap:2px}.dealer-bank i {width:10px;height:9px}
+ .gesture-overlay.realistic-signal {width:190px;height:253px;top:38%;left:63%}.realistic-signal .gesture-caption {font-size:10px;padding:6px 9px;bottom:5px}.realistic-signal .gesture-caption b {font-size:8px}
+ .action-symbol {width:34px;height:34px;font-size:24px}.action-flash b {font-size:19px}.action-flash small {font-size:9px!important}.action-flash {gap:10px}
+ .wager-zone.in-play {height:17px;min-height:17px}.wager-zone.in-play .wager-label {font-size:8px}.wager-zone.in-play .wager-label strong {font-size:11px}
+ .action-dock {min-height:62px}
+}
+@media(max-height:700px) {
+ .table-mark {min-height:56px}.round-result {inset:-3px 0;padding:6px 12px}.result-copy strong {font-size:19px}.result-copy small {font-size:8px}.result-money strong {font-size:22px}#result-payment {margin-top:2px;font-size:8px}
+ .hand-foot {margin-top:5px;min-height:22px}.table-card .pips i {font-size:11px}.table-card .court {inset:16px 11px}.table-card .court b {font-size:20px}.table-card .court.ace i {font-size:27px}.table-card .corner {font-size:13px}.table-card .corner small {font-size:10px}
+ .gesture-overlay.realistic-signal {width:168px;height:224px;top:37%}.realistic-signal .gesture-caption {font-size:9px;bottom:0}
+}
+@media(max-height:600px) {
+ .table-top {padding-top:6px}.table-mark {min-height:46px}.round-result {padding:4px 10px}.result-copy strong {font-size:17px}.result-money strong {font-size:19px}.result-copy small {font-size:7px}#result-payment {font-size:7px}
+ .felt .card {height:62px;width:45px}.felt .cards {min-height:62px}.felt .card+.card {margin-left:-20px}.felt .table-card .pips i {font-size:10px}.felt .table-card .pips {inset:4px 8px}.felt .table-card .corner {font-size:11px}.felt .table-card .corner small {font-size:8px}.felt .table-card .court {inset:14px 10px}.hand-foot {min-height:20px;margin-top:4px}.hand-label {margin-bottom:2px}
+ .gesture-overlay.realistic-signal {width:145px;height:193px;top:34%}.realistic-signal .gesture-caption {font-size:8px}.chip-tray {margin-top:5px}
+}
+@media(max-height:500px) and (orientation:landscape) {
+ .table-mark {display:flex;min-height:43px;width:94%}.table-mark>span,.table-mark>small,.table-mark>b {display:none}.round-result {inset:0;padding:3px 9px}.result-copy strong {font-size:16px}.result-copy small {font-size:7px}.result-money strong {font-size:18px}#result-payment {display:none}
+ .felt .card {width:33px;height:46px}.felt .cards {min-height:46px}.felt .card+.card {margin-left:-13px}.felt .table-card .corner {font-size:9px}.felt .table-card .corner small {font-size:6px}.felt .table-card .pips {inset:5px 6px}.felt .table-card .pips i {font-size:8px}.felt .table-card .court {inset:12px 9px}.felt .table-card .court b {font-size:16px}.hand-foot {min-height:18px;gap:4px}.hand-wager {height:18px}.hand-state {font-size:6px}.wager-zone.in-play {display:none}.table-status {font-size:8px}.gesture-overlay.realistic-signal {width:125px;height:166px;top:22%}
+}
+@media(prefers-reduced-motion:reduce) {.hand-ground-shadow,.hand-contact {display:none}.table-card {will-change:auto}}
