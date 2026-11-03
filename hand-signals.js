@@ -29,7 +29,7 @@ export class HandSignals {
     for(const [i,el] of [...this.layer.querySelectorAll('.hand-pose')].entries()){el.style.backgroundImage=`url("${ATLAS}")`;el.style.backgroundPosition=posePosition(poses[i]);}
     this.layer.hidden=false;
     const wrist=this.layer.querySelector('.hand-wrist'),shadow=this.layer.querySelector('.hand-ground-shadow'),contact=this.layer.querySelector('.hand-contact'),second=this.layer.querySelector('.pose-b');
-    const isReduced=motionReduced(),duration=paceTime(3400);
+    const isReduced=motionReduced(),duration=paceTime(2000);
     const run=(el,frames,options={})=>{const a=el.animate(frames,{duration,fill:'both',easing:'linear',...options});this.animations.push(a);return a.finished.catch(()=>{});};
     const incoming={opacity:0,transform:'translate(30px,80px) rotate(12deg) scale(.87)',offset:0};
     const outgoing={opacity:0,transform:'translate(25px,65px) rotate(8deg) scale(.92)',offset:1};
