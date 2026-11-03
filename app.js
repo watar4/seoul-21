@@ -1,15 +1,16 @@
 import {buildRoundPlan,settlementFor} from './round-flow.js';
 import {TableView,stampCards,pause} from './table-motion.js';
 import {HandSignals} from './hand-signals.js';
+import {getPace,setPace} from './pacing.js';
 import {explainDecision} from './review.js';
 import {fresh,deal,act,available,score,baseAction,LABELS} from './engine.js';
 const $=id=>document.getElementById(id),key='seoul21.state.v1';
 let state=fresh(),reviewOn=true,signalOn=true,storageOK=true;
 let busy=false,presentation=null;
-try{const stored=JSON.parse(localStorage.getItem(key));if(stored?.version===1&&Number.isFinite(stored.bankroll)&&stored.bankroll>=0&&Number.isFinite(stored.initial)&&stored.initial>=1&&['playing','finished','betting'].includes(stored.phase)&&Array.isArray(stored.hands)&&stored.rules)state=stored;reviewOn=localStorage.getItem('seoul21.review')!=='off';signalOn=localStorage.getItem('seoul21.signal')!=='off';}catch{storageOK=false;}
+try{const stored=JSON.parse(localStorage.getItem(key));if(stored?.version===1&&Number.isFinite(stored.bankroll)&&stored.bankroll>=0&&Number.isFinite(stored.initial)&&stored.initial>=1&&['playing','finished','betting'].includes(stored.phase)&&Array.isArray(stored.hands)&&stored.rules)state=stored;reviewOn=localStorage.getItem('seoul21.review')!=='off';signalOn=localStorage.getItem('seoul21.signal')!=='off';setPace(localStorage.getItem('seoul21.pace'));}catch{storageOK=false;}
 const fmt=n=>Number(n).toLocaleString('ja-JP',{maximumFractionDigits:2}),signed=n=>(n>0?'+':n<0?'−':'±')+fmt(Math.abs(n));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function save(){try{localStorage.setItem(key,JSON.stringify(state));localStorage.setItem('seoul21.review',reviewOn?'on':'off');localStorage.setItem('seoul21.signal',signalOn?'on':'off');}catch{storageOK=false;}}
+function save(){try{localStorage.setItem(key,JSON.stringify(state));localStorage.setItem('seoul21.review',reviewOn?'on':'off');localStorage.setItem('seoul21.signal',signalOn?'on':'off');localStorage.setItem('seoul21.pace',getPace());}catch{storageOK=false;}}
 function card(c,back=false){if(back)return '<div class="card back" aria-label="裏向きのカード">♠</div>';const r=esc(c.rank),s=esc(c.suit);return `<div class="card ${['♥','♦'].includes(c.suit)?'red':''}" aria-label="${s}${r}"><span class="corner">${r}<small>${s}</small></span>${s}<span class="corner bottom">${r}<small>${s}</small></span></div>`;}
 function totalText(cards){const x=score(cards);return (x.soft?'SOFT ':'')+x.total;}
 function ruleText(){return `6デッキ / ${state.rules.h17?'H17':'S17'} / DAS / 最大3ハンド / ${state.rules.mode==='peek'?'BJ先確認・レイトサレンダー':'ENHC・追加分も損失・サレンダーなし'}`;}
@@ -40,6 +41,7 @@ function render(){
  $('bet').max=view.bankroll;$('bet').disabled=busy;
  for(const id of ['rules-open','undo','clear-bet'])$(id).disabled=busy;
  $('review-toggle').checked=reviewOn;$('signal-toggle').checked=signalOn;
+ $('animation-pace').value=getPace();$('animation-pace').disabled=busy;
  $('accuracy').textContent=view.stats.decisions?Math.round(view.stats.correct/view.stats.decisions*100)+'%':'—';
  $('record').textContent=`${view.stats.wins} / ${view.stats.losses} / ${view.stats.pushes}`;
  $('dealer-rule').value=view.rules.h17?'h17':'s17';$('deal-rule').value=view.rules.mode;
@@ -109,7 +111,6 @@ async function perform(kind,action){
  if(busy)return;
  stampCards(state);
  const before=structuredClone(state);busy=true;$('error').textContent='';
- let gesture=Promise.resolve();
  try{
   if(kind==='deal'){deal(state,Number($('bet').value));betHistory=[];}
   else {act(state,action);if(action==='double')state.hands[before.active].doubled=true;}
@@ -121,16 +122,16 @@ async function perform(kind,action){
    switch(step.type){
     case 'place-bet': await board.chips(final.hands[0].bet,$('wager-zone'),document.querySelector('.hand-wager'));break;
     case 'action':
-     if(signalOn)gesture=signals.play(action);
-     await board.action(action,step.hand);break;
-    case 'deal-card': await Promise.all([board.move(previous),board.deal(step.cardId)]);break;
-    case 'turn-card': await board.turn(step.cardId,step.hole);await board.total(step.side==='dealer'?'dealer':step.hand);break;
+     await Promise.all([board.action(action,step.hand),signalOn?signals.play(action):Promise.resolve()]);
+     await pause(350);break;
+    case 'deal-card': await Promise.all([board.move(previous),board.deal(step.cardId)]);await pause(200);break;
+    case 'turn-card': await board.turn(step.cardId,step.hole);await board.total(step.side==='dealer'?'dealer':step.hand);await pause(450);break;
     case 'split': await Promise.all([board.move(previous),board.chips(step.amount,$('balance'),$('hands').children[step.hand+1].querySelector('.hand-wager'))]);break;
     case 'add-stake': await board.chips(step.amount,$('balance'),$('hands').children[step.hand].querySelector('.hand-wager'));break;
     case 'close-hand': await board.closeHand(step.action,step.hand);break;
-    case 'hand-total': await board.total(step.hand);await gesture;board.clearAction();break;
-    case 'dealer-turn': await pause(500);break;
-    case 'dealer-total': await board.total('dealer');await pause(650);break;
+    case 'hand-total': await board.total(step.hand);await pause(450);board.clearAction();break;
+    case 'dealer-turn': await pause(1100);break;
+    case 'dealer-total': await board.total('dealer');await pause(1600);break;
     case 'outcome': await board.outcome(step.view);break;
     case 'payout': await board.payout(step);present(step.after,stageText.payout);break;
     case 'ready': break;
@@ -150,3 +151,4 @@ $('next-round').onclick=async()=>{
  $('bet').value=0;betHistory=[];busy=false;render();
 };
 $('signal-toggle').addEventListener('change',()=>{signalOn=$('signal-toggle').checked;save();});
+$('animation-pace').addEventListener('change',()=>{if(busy)return;setPace($('animation-pace').value);save();});
