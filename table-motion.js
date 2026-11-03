@@ -150,25 +150,25 @@ export class TableView {
       animate(el.querySelector('.card-sheen'),[{opacity:0,transform:'translateX(-110%)'},{opacity:.6,offset:.48},{opacity:0,transform:'translateX(130%)'}],hole?1350:850)
     ]);
   }
-  async total(hand) {
+  async total(hand, duration=450) {
     const score=hand==='dealer'?$('dealer-score'):$('hands').children[hand]?.querySelector('.score');
-    await animate(score,[{transform:'scale(.9)',filter:'brightness(1)'},{transform:'scale(1.18)',filter:'brightness(1.8)',offset:.45},{transform:'scale(1)',filter:'brightness(1)'}],450);
+    await animate(score,[{transform:'scale(.9)',filter:'brightness(1)'},{transform:'scale(1.18)',filter:'brightness(1.8)',offset:.45},{transform:'scale(1)',filter:'brightness(1)'}],duration);
   }
   async action(action, hand) {
     const text={hit:['HIT','カードを1枚'],stand:['STAND','この手札で勝負'],double:['DOUBLE','ベットを2倍に'],split:['SPLIT','2つのハンドへ'],surrender:['SURRENDER','ベットの半分を返却']}[action];
     const badge=$('action-flash');
     badge.innerHTML=`<span class="action-symbol">${{hit:'＋',stand:'✓',double:'×2',split:'⑂',surrender:'½'}[action]}</span><span><b>${text[0]}</b><small>${text[1]}</small></span>`;
     badge.hidden=false;
-    await animate(badge,[{opacity:0,transform:'translateY(12px) scale(.88)'},{opacity:1,transform:'translateY(-2px) scale(1.03)',offset:.7},{opacity:1,transform:'none'}],550);
+    await animate(badge,[{opacity:0,transform:'translateY(12px) scale(.88)'},{opacity:1,transform:'translateY(-2px) scale(1.03)',offset:.7},{opacity:1,transform:'none'}],300);
     const el=$('hands').children[hand];
-    if (el) await animate(el,[{filter:'brightness(1)'},{filter:'brightness(1.2)',offset:.45},{filter:'brightness(1)'}],350);
-    await pause(450);
+    if (el) await animate(el,[{filter:'brightness(1)'},{filter:'brightness(1.2)',offset:.45},{filter:'brightness(1)'}],220);
+    await pause(100);
   }
   async closeHand(action, hand) {
     const el=$('hands').children[hand];
     await Promise.all([...el.querySelectorAll('.table-card')].map((card,i)=>{
       const base=getComputedStyle(card).transform;
-      return animate(card,[{transform:base},{transform:`translateY(${action==='stand'?-5:6}px) rotate(${action==='stand'?-3:3}deg) ${base}`,offset:.5},{transform:base}],800,{delay:i*80});
+      return animate(card,[{transform:base},{transform:`translateY(${action==='stand'?-5:6}px) rotate(${action==='stand'?-3:3}deg) ${base}`,offset:.5},{transform:base}],380,{delay:i*40});
     }));
   }
   clearAction() { $('action-flash').hidden=true; }

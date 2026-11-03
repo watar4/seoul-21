@@ -123,15 +123,15 @@ async function perform(kind,action){
     case 'place-bet': await board.chips(final.hands[0].bet,$('wager-zone'),document.querySelector('.hand-wager'));break;
     case 'action':
      await Promise.all([board.action(action,step.hand),signalOn?signals.play(action):Promise.resolve()]);
-     await pause(350);break;
+     await pause(120);break;
     case 'deal-card': await Promise.all([board.move(previous),board.deal(step.cardId)]);await pause(200);break;
     case 'turn-card': await board.turn(step.cardId,step.hole);await board.total(step.side==='dealer'?'dealer':step.hand);await pause(450);break;
     case 'split': await Promise.all([board.move(previous),board.chips(step.amount,$('balance'),$('hands').children[step.hand+1].querySelector('.hand-wager'))]);break;
     case 'add-stake': await board.chips(step.amount,$('balance'),$('hands').children[step.hand].querySelector('.hand-wager'));break;
     case 'close-hand': await board.closeHand(step.action,step.hand);break;
-    case 'hand-total': await board.total(step.hand);await pause(450);board.clearAction();break;
-    case 'dealer-turn': await pause(1100);break;
-    case 'dealer-total': await board.total('dealer');await pause(1600);break;
+    case 'hand-total': await board.total(step.hand,250);await pause(120);board.clearAction();break;
+    case 'dealer-turn': await pause(400);break;
+    case 'dealer-total': await board.total('dealer');await pause(650);break;
     case 'outcome': await board.outcome(step.view);break;
     case 'payout': await board.payout(step);present(step.after,stageText.payout);break;
     case 'ready': break;
